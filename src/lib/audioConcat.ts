@@ -1,10 +1,12 @@
 import ffmpeg from "fluent-ffmpeg";
 import ffmpegInstaller from "@ffmpeg-installer/ffmpeg";
+import ffprobeInstaller from "@ffprobe-installer/ffprobe";
 import fs from "fs/promises";
 import path from "path";
 import { segmentsDir, episodeAudioPath } from "./storage";
 
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
+ffmpeg.setFfprobePath(ffprobeInstaller.path);
 
 export async function concatenateSegments(episodeId: string): Promise<number> {
   const segsDir = segmentsDir(episodeId);

@@ -56,12 +56,6 @@ export async function generateAllAudio(
 ): Promise<void> {
   const outDir = segmentsDir(episodeId);
 
-  // Track previous request IDs per speaker for prosody continuity
-  const previousIds: Record<string, string[]> = {
-    hostA: [],
-    hostB: [],
-  };
-
   for (let i = 0; i < segments.length; i++) {
     const segment = segments[i];
     const speaker = segment.speaker;
@@ -74,30 +68,21 @@ export async function generateAllAudio(
     );
 
     const response = await withRetry(async () => {
-      return client.textToSpeech
-        .convert(voiceId, {
-          text: segment.text,
-          modelId: ELEVENLABS_MODEL,
-          outputFormat: ELEVENLABS_OUTPUT_FORMAT,
-          voiceSettings: {
-            stability: settings.stability,
-            similarityBoost: settings.similarityBoost,
-            style: settings.style,
-            useSpeakerBoost: settings.useSpeakerBoost,
-          },
-          previousRequestIds: previousIds[speaker].slice(-3),
-        })
-        .withRawResponse();
+      return client.textToSpeech.convert(voiceId, {
+        text: segment.text,
+        modelId: ELEVENLABS_MODEL,
+        outputFormat: ELEVENLABS_OUTPUT_FORMAT,
+        voiceSettings: {
+          stability: settings.stability,
+          similarityBoost: settings.similarityBoost,
+          style: settings.style,
+          useSpeakerBoost: settings.useSpeakerBoost,
+        },
+      });
     });
 
-    const buffer = await streamToBuffer(response.data);
+    const buffer = await streamToBuffer(response);
     await fs.writeFile(filePath, buffer);
-
-    // Extract request ID from headers for continuity
-    const requestId = response.rawResponse.headers.get("request-id");
-    if (requestId) {
-      previousIds[speaker].push(requestId);
-    }
 
     onProgress?.({ current: i + 1, total: segments.length });
 

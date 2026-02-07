@@ -5,7 +5,9 @@ import { z } from "zod";
 export const KeyPointSchema = z.object({
   topic: z.string().describe("Short topic label, 2-4 words"),
   summary: z.string().describe("2-3 sentence summary of this point"),
-  significance: z.string().describe("Why this matters to the audience, 1 sentence"),
+  details: z.string().describe("4-6 sentences of rich detail: key facts, numbers, names, specific examples, and interesting nuances that make this topic worth discussing in depth"),
+  significance: z.string().describe("Why this matters to the audience, 2-3 sentences explaining real-world impact"),
+  surprisingAngle: z.string().describe("What is the most surprising, counterintuitive, or debate-worthy aspect of this topic? 1-2 sentences"),
 });
 
 export const SummarySchema = z.object({
@@ -23,8 +25,8 @@ export const DialogueSegmentSchema = z.object({
   text: z.string().describe("The spoken dialogue line, 1-4 sentences"),
   topic: z
     .string()
-    .optional()
-    .describe("Which key point this relates to"),
+    .nullable()
+    .describe("Which key point this relates to, or null if not specific to one topic"),
 });
 
 export const DialogueScriptSchema = z.object({

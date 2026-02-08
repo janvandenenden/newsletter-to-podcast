@@ -59,4 +59,6 @@ export interface EpisodeMeta {
   currentSegment?: number;
   sourceTextPreview: string;
   error?: string;
+  sourceType: "paste" | "newsletters";
+  sourceNewsletterIds?: string[];
 }

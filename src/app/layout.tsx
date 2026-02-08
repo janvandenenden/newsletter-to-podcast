@@ -44,6 +44,12 @@ export default function RootLayout({
                 New Episode
               </Link>
               <Link
+                href="/newsletters"
+                className="hover:underline underline-offset-4"
+              >
+                Newsletters
+              </Link>
+              <Link
                 href="/episodes"
                 className="hover:underline underline-offset-4"
               >

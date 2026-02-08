@@ -2,6 +2,7 @@ import path from "path";
 
 export const DATA_DIR = path.join(process.cwd(), "data");
 export const EPISODES_DIR = path.join(DATA_DIR, "episodes");
+export const NEWSLETTERS_DIR = path.join(DATA_DIR, "newsletters");
 
 export const OPENAI_MODEL = "gpt-4o";
 

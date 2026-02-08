@@ -8,16 +8,40 @@ import {
   updateMeta,
   writeScript,
 } from "./storage";
+import {
+  readNewsletterMeta,
+  readNewsletterContent,
+  markNewsletterUsed,
+} from "./newsletterStorage";
 import type { EpisodeMeta } from "@/types/episode";
+
+export async function assembleNewsletterText(
+  newsletterIds: string[]
+): Promise<string> {
+  const parts: string[] = [];
+  for (const id of newsletterIds) {
+    const meta = await readNewsletterMeta(id);
+    const content = await readNewsletterContent(id);
+    parts.push(`--- Newsletter: "${meta.subject}" (from ${meta.sender}) ---\n${content}`);
+  }
+  return parts.join("\n\n");
+}
 
 export async function runPipeline(
   episodeId: string,
-  text: string
+  text: string,
+  newsletterIds?: string[]
 ): Promise<void> {
   try {
+    // Assemble source text
+    let sourceText = text;
+    if (newsletterIds?.length) {
+      sourceText = await assembleNewsletterText(newsletterIds);
+    }
+
     // Stage 1: Summarize
     await updateMeta(episodeId, { status: "summarizing" });
-    const summary = await summarizeNewsletter(text);
+    const summary = await summarizeNewsletter(sourceText);
 
     // Update title from summary
     await updateMeta(episodeId, {
@@ -45,6 +69,13 @@ export async function runPipeline(
     // Stage 4: Concatenate
     const duration = await concatenateSegments(episodeId);
 
+    // Mark newsletters as used
+    if (newsletterIds?.length) {
+      for (const nlId of newsletterIds) {
+        await markNewsletterUsed(nlId, episodeId);
+      }
+    }
+
     // Done
     await updateMeta(episodeId, {
       status: "complete",
@@ -59,18 +90,28 @@ export async function runPipeline(
   }
 }
 
+interface InitEpisodeOptions {
+  sourceType: "paste" | "newsletters";
+  text?: string;
+  newsletterIds?: string[];
+}
+
 export async function initializeEpisode(
   episodeId: string,
-  text: string
+  opts: InitEpisodeOptions
 ): Promise<EpisodeMeta> {
   await createEpisodeDir(episodeId);
+
+  const preview = opts.text?.slice(0, 200) ?? "";
 
   const meta: EpisodeMeta = {
     id: episodeId,
     title: "Processing...",
     createdAt: new Date().toISOString(),
     status: "processing",
-    sourceTextPreview: text.slice(0, 200),
+    sourceTextPreview: preview,
+    sourceType: opts.sourceType,
+    sourceNewsletterIds: opts.newsletterIds,
   };
 
   await writeMeta(episodeId, meta);

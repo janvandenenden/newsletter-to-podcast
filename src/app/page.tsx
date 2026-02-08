@@ -1,4 +1,4 @@
-import EpisodeForm from "@/components/EpisodeForm";
+import EpisodeCreator from "@/components/EpisodeCreator";
 
 export default function Home() {
   return (
@@ -6,11 +6,11 @@ export default function Home() {
       <div>
         <h1 className="text-2xl font-bold">Create a New Episode</h1>
         <p className="text-gray-500 text-sm mt-1">
-          Paste newsletter text and we&apos;ll turn it into a two-host podcast
+          Select newsletters or paste text to generate a two-host podcast
           episode.
         </p>
       </div>
-      <EpisodeForm />
+      <EpisodeCreator />
     </div>
   );
 }
